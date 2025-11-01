@@ -19,7 +19,6 @@ import org.springframework.http.MediaType;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/products")
@@ -36,16 +35,19 @@ public class ProductController {
         return ResponseEntity.ok(productService.getAllProducts());
     }
 
-
+    /**
+     * Get a single product by ID and optionally track view
+     */
     @GetMapping("/{id}")
     public ResponseEntity<Product> getProductById(
             @PathVariable Long id,
             @RequestParam(required = false) Long userId) {
         try {
+            // Track user view if userId is provided
             if (userId != null) {
                 recommendationService.recordInteraction(userId, id, "VIEW", null);
             }
-
+            
             return productService.getProductById(id)
                     .map(ResponseEntity::ok)
                     .orElse(ResponseEntity.notFound().build());
@@ -104,24 +106,14 @@ public class ProductController {
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteProduct(
-            @PathVariable Long id,
-            @RequestParam Long userId
-    ) {
+    public ResponseEntity<?> deleteProduct(@PathVariable Long id, @RequestParam Long adminId) {
         try {
-            productService.deleteProduct(id, userId);
-            return ResponseEntity.ok(Map.of(
-                    "message", "Product deleted successfully",
-                    "productId", id
-            ));
+            productService.deleteProduct(id, adminId);
+            return ResponseEntity.ok("Product deleted successfully");
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of(
-                    "error", e.getMessage()
-            ));
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
-
 
     @GetMapping("/my-products")
     public ResponseEntity<List<Product>> getMyProducts(@RequestParam Long sellerId) {
@@ -134,13 +126,14 @@ public class ProductController {
             // Construct the path to the image
             Path imagePath = Path.of("product-images").resolve(filename).normalize();
             Resource resource = new UrlResource(imagePath.toUri());
-
+            
             if (resource.exists() && resource.isReadable()) {
+                // Determine content type
                 String contentType = Files.probeContentType(imagePath);
                 if (contentType == null) {
                     contentType = "application/octet-stream";
                 }
-
+                
                 return ResponseEntity.ok()
                         .contentType(MediaType.parseMediaType(contentType))
                         .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")

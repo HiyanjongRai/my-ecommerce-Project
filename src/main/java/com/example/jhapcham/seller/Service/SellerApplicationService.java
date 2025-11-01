@@ -7,6 +7,7 @@ import com.example.jhapcham.seller.model.SellerApplication;
 import com.example.jhapcham.seller.model.SellerProfile;
 import com.example.jhapcham.seller.repository.SellerApplicationRepository;
 import com.example.jhapcham.seller.repository.SellerProfileRepository;
+import com.example.jhapcham.user.model.Role;
 import com.example.jhapcham.user.model.Status;
 import com.example.jhapcham.user.model.User;
 import com.example.jhapcham.user.model.repository.UserRepository;
@@ -39,10 +40,10 @@ public class SellerApplicationService {
         User seller = userRepo.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Seller (user) not found"));
 
-        if (seller.getRole() == null || seller.getRole().name() == null || seller.getRole().name().isEmpty()) {
+        if (seller.getRole() == null) {
             throw new RuntimeException("Invalid user role");
         }
-        if (seller.getRole() != com.example.jhapcham.user.model.Role.SELLER) {
+        if (seller.getRole() != Role.SELLER) {
             throw new RuntimeException("User is not a seller");
         }
 
@@ -109,9 +110,6 @@ public class SellerApplicationService {
         app.setStatus(ApplicationStatus.REJECTED);
         app.setReviewNote(note);
         app.setReviewedAt(LocalDateTime.now());
-
-        // keep user in PENDING or set BLOCKED if you prefer strict
-        // app.getUser().setStatus(Status.BLOCKED); userRepo.save(app.getUser());
 
         return applicationRepo.save(app);
     }

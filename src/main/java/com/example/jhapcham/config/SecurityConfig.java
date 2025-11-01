@@ -22,11 +22,26 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.configure(http))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                        // Public auth
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/customer/register", "/api/sellers/register", "/api/admin/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/customer/login", "/api/sellers/login").permitAll()
+
+                        // Public read-only catalog (adjust patterns to your app)
+                        .requestMatchers(HttpMethod.GET, "/api/products/**", "/api/categories/**").permitAll()
+
+                        // Cart endpoints public (if you want guest cart), else require login
+                        .requestMatchers(HttpMethod.POST, "/cart/add", "/cart/remove").permitAll()
+                        .requestMatchers(HttpMethod.GET,  "/cart").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // allow preflight
                         .requestMatchers(HttpMethod.POST, "/api/customer/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/customer/login").permitAll()
@@ -36,6 +51,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/sellers/application").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/admin/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/admin/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/cart/add").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/cart").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/cart/remove").permitAll()
+
                         // Allow product creation with JSON or multipart form-data (image + details)
                         .requestMatchers(HttpMethod.POST, "/api/products/create/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/products/create-form/**").permitAll()
@@ -43,8 +62,19 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/products/*/*/image").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/products/upload-image").permitAll()
                         // Allow reading product data if you expose GETs
+                        .requestMatchers("/api/products/update/**").permitAll()
+                        .requestMatchers("/api/products/delete/**").permitAll()
+                        .requestMatchers("/api/products/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
                         .requestMatchers("/api/admin/**").permitAll()
+
+                        .requestMatchers(HttpMethod.POST,   "/cart/add").permitAll()
+                        .requestMatchers(HttpMethod.GET,    "/cart").permitAll()
+                        .requestMatchers(HttpMethod.DELETE, "/cart/remove").permitAll()
+
+                        //  Permit Reviews API
+                        .requestMatchers(HttpMethod.GET,  "/reviews").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/reviews/add").permitAll()
                         .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults())
@@ -57,13 +87,18 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.setAllowedOriginPatterns(List.of("http://127.0.0.1:5500", "http://localhost:5500"));
+        config.setAllowedOriginPatterns(List.of("http://127.0.0.1:*", "http://localhost:*"));
         config.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
 
 
+        config.setAllowedOriginPatterns(List.of("http://127.0.0.1:5500", "http://127.0.0.1:5501", "http://localhost:5500", "http://localhost:5501"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
     }
+
+
+
+
 }
