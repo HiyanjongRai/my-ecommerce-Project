@@ -33,6 +33,7 @@ public class SecurityConfig {
 
                         // Public auth
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/customer/register", "/api/sellers/register", "/api/admin/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/customer/login", "/api/sellers/login").permitAll()
 
@@ -72,9 +73,26 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET,    "/cart").permitAll()
                         .requestMatchers(HttpMethod.DELETE, "/cart/remove").permitAll()
 
-                        //  Permit Reviews API
-                        .requestMatchers(HttpMethod.GET,  "/reviews").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/reviews/add").permitAll()
+                            //  Permit Reviews API
+                            .requestMatchers(HttpMethod.GET,  "/reviews").permitAll()
+                            .requestMatchers(HttpMethod.POST, "/reviews/add").permitAll()
+
+                            // Permit User Activity API
+                            .requestMatchers(HttpMethod.GET,  "/api/user-activity/**", "/userActivity/**").permitAll()
+                            .requestMatchers(HttpMethod.POST, "/api/user-activity/**", "/userActivity/**").permitAll()
+                            .requestMatchers(HttpMethod.PUT,  "/api/user-activity/**", "/userActivity/**").permitAll()
+                            .requestMatchers(HttpMethod.DELETE, "/api/user-activity/**", "/userActivity/**").permitAll()
+                            .requestMatchers(HttpMethod.GET, "/activity/**").permitAll()
+
+
+                        .requestMatchers("/likes/**").permitAll()
+
+                        .requestMatchers(HttpMethod.GET, "/productLike/product-likes").permitAll()
+
+                            // Permit User Product Interaction API
+                            .requestMatchers(HttpMethod.POST, "/interactions/**").permitAll()
+                            .requestMatchers(HttpMethod.GET, "/interactions/**").permitAll()
+
                         .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults())

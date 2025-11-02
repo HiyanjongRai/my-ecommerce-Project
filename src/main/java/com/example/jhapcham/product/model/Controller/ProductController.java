@@ -5,7 +5,7 @@ package com.example.jhapcham.product.model.Controller;
 import com.example.jhapcham.product.model.Product;
 import com.example.jhapcham.product.model.dto.ProductDto;
 import com.example.jhapcham.product.model.service.ProductService;
-import com.example.jhapcham.product.model.service.RecommendationService;
+//import com.example.jhapcham.product.model.service.RecommendationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,29 +29,11 @@ public class ProductController {
     private ProductService productService;
 
     @Autowired
-    private RecommendationService recommendationService;
+//    private RecommendationService recommendationService;
 
     @GetMapping
     public ResponseEntity<List<Product>> getAllProducts() {
         return ResponseEntity.ok(productService.getAllProducts());
-    }
-
-
-    @GetMapping("/{id}")
-    public ResponseEntity<Product> getProductById(
-            @PathVariable Long id,
-            @RequestParam(required = false) Long userId) {
-        try {
-            if (userId != null) {
-                recommendationService.recordInteraction(userId, id, "VIEW", null);
-            }
-
-            return productService.getProductById(id)
-                    .map(ResponseEntity::ok)
-                    .orElse(ResponseEntity.notFound().build());
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
     }
 
     @PostMapping("/add")
@@ -120,6 +102,14 @@ public class ProductController {
             ));
         }
     }
+
+
+    @GetMapping("/search")
+    public ResponseEntity<List<ProductDto>> searchProducts(@RequestParam String keyword) {
+        List<ProductDto> products = productService.searchProducts(keyword);
+        return ResponseEntity.ok(products);
+    }
+
 
 
 

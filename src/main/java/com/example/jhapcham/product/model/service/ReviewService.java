@@ -89,7 +89,7 @@ public class ReviewService {
     // Helper to update the average rating of a product after CRUD
     private void updateProductAverageRating(Product product) {
         List<Review> reviews = reviewRepository.findByProduct(product);
-        double avgRating = reviews.stream().mapToInt(Review::getRating).average().orElse(0.0);
+        double avgRating = reviews.stream().mapToDouble(Review::getRating).average().orElse(0.0);
         product.setRating(avgRating);
         productRepository.save(product);
     }

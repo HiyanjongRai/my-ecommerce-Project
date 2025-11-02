@@ -4,6 +4,7 @@ package com.example.jhapcham.product.model.service;
 import com.example.jhapcham.product.model.Product;
 import com.example.jhapcham.product.model.dto.ProductDto;
 import com.example.jhapcham.product.model.repository.ProductRepository;
+import com.example.jhapcham.productLike.ProductLikeRepository;
 import com.example.jhapcham.user.model.Role;
 import com.example.jhapcham.user.model.User;
 import com.example.jhapcham.user.model.repository.UserRepository;
@@ -17,9 +18,13 @@ import java.nio.file.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
+
+    @Autowired
+    private ProductLikeRepository productLikeRepository;
 
     private final String uploadDir = "product-images"; // folder in local device
 
@@ -79,6 +84,13 @@ public class ProductService {
         return productRepository.save(product);
     }
 
+    public List<ProductDto> searchProducts(String keyword) {
+        List<Product> products = productRepository.searchProducts(keyword);
+        return products.stream()
+                .map(this::toProductDto)
+                .collect(Collectors.toList());
+    }
+
     public void deleteProduct(Long productId, Long userId) throws Exception {
         // Find user (can be admin or seller)
         User user = userRepository.findById(userId)
@@ -109,6 +121,20 @@ public class ProductService {
 
     public List<Product> getProductsBySeller(Long sellerId) {
         return productRepository.findBySellerId(sellerId);
+    }
+
+    public ProductDto toProductDto(Product product) {
+        int likeCount = productLikeRepository.countByProduct(product);
+
+        return ProductDto.builder()
+                .id(product.getId())
+                .name(product.getName())
+                .description(product.getDescription())
+                .price(product.getPrice())
+                .category(product.getCategory())
+                .image(null) // Set to null or remove if not needed for GET
+                .totalLikes(likeCount)
+                .build();
     }
 
     // Save uploaded image to local directory

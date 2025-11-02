@@ -22,5 +22,5 @@ public class Product {
 
     private Long sellerId;
 
-    private String imagePath; // store file path of the image
+    private String imagePath;
 }

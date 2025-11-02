@@ -12,5 +12,7 @@ public class ProductDto {
     private String description;
     private Double price;
     private String category;
-    private MultipartFile image; // image file uploaded
+    private MultipartFile image;
+    private Long id;
+    private Integer totalLikes;     // Add this field
 }

@@ -1,31 +1,26 @@
-package com.example.jhapcham.product.model;
+package com.example.jhapcham.productLike;
 
+import com.example.jhapcham.product.model.Product;
 import com.example.jhapcham.user.model.User;
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class Review {
+public class ProductLike {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "product_id")
-    private Product product;
-
-    @ManyToOne
-    @JoinColumn(name = "user_id")
     private User user;
 
-    private String comment;
+    @ManyToOne
+    private Product product;
 
-    private double rating;
-
-    private Long timestamp;
+    private long timestamp;
 }
